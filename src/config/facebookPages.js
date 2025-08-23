@@ -1,5 +1,5 @@
 // Facebook Pages Management
-// ไฟล์นี้ใช้สำหรับจัดการการตั้งค่าของ Facebook Pages ทั้งหมด
+// This file use Manage all Facebook Pages 
 
 class FacebookPagesManager {
   constructor() {
