@@ -2,6 +2,7 @@ const express = require('express');
 const { config, validateConfig } = require('./config');
 const { logger, performanceLogger } = require('./utils/logger');
 const TelegramBotController = require('./controllers/lineBotController');
+const FacebookAppManager = require('./utils/facebookAppManager');
 
 // สร้าง Express app
 const app = express();
@@ -10,6 +11,10 @@ const app = express();
 try {
   validateConfig();
   logger.info('Configuration validated successfully');
+  
+  // แสดงรายงานการใช้งาน Facebook Apps
+  const appManager = new FacebookAppManager();
+  appManager.generateReport();
 } catch (error) {
   logger.error('Configuration validation failed:', error);
   process.exit(1);
@@ -108,7 +113,7 @@ app.get('/api/status', async (req, res) => {
   try {
     const facebookReelsService = telegramBotController.facebookReelsService;
     const queueStatus = await facebookReelsService.getQueueStatus();
-    const enabledPagesCount = facebookReelsService.getEnabledPagesCount();
+    const enabledPagesCount = await facebookReelsService.getEnabledPagesCount();
     
     res.json({
       status: 'running',
@@ -135,9 +140,10 @@ app.get('/api/facebook/pages', async (req, res) => {
   try {
     const facebookReelsService = telegramBotController.facebookReelsService;
     const connectionStatus = await facebookReelsService.checkFacebookConnection();
+    const enabledPagesCount = await facebookReelsService.getEnabledPagesCount();
     
     res.json({
-      totalPages: facebookReelsService.getEnabledPagesCount(),
+      totalPages: enabledPagesCount,
       connections: connectionStatus
     });
   } catch (error) {

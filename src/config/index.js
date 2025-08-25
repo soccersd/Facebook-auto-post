@@ -10,10 +10,37 @@ const config = {
     botToken: process.env.TELEGRAM_BOT_TOKEN,
   },
   
-  // Facebook Configuration
+  // Facebook Configuration - รองรับแบบจับคู่ App ID + Page Token
   facebook: {
-    appId: process.env.FACEBOOK_APP_ID,
-    appSecret: process.env.FACEBOOK_APP_SECRET,
+    // Primary App (App 1)
+    appId: process.env.FACEBOOK_APP_ID_1 || process.env.FACEBOOK_APP_ID,
+    appSecret: process.env.FACEBOOK_APP_SECRET_1 || process.env.FACEBOOK_APP_SECRET || null,
+    
+    // Multiple Apps Support - รองรับหลาย App
+    apps: {
+      app1: {
+        appId: process.env.FACEBOOK_APP_ID_1,
+        appSecret: process.env.FACEBOOK_APP_SECRET_1 || null
+      },
+      app2: {
+        appId: process.env.FACEBOOK_APP_ID_2,
+        appSecret: process.env.FACEBOOK_APP_SECRET_2 || null
+      },
+      app3: {
+        appId: process.env.FACEBOOK_APP_ID_3,
+        appSecret: process.env.FACEBOOK_APP_SECRET_3 || null
+      },
+      app4: {
+        appId: process.env.FACEBOOK_APP_ID_4,
+        appSecret: process.env.FACEBOOK_APP_SECRET_4 || null
+      },
+      app5: {
+        appId: process.env.FACEBOOK_APP_ID_5,
+        appSecret: process.env.FACEBOOK_APP_SECRET_5 || null
+      }
+      // เพิ่มได้ตามต้องการ
+    },
+    
     // โหลด Facebook Pages จาก FacebookPagesManager
     pages: pagesManager.getEnabledPages()
   },
@@ -45,11 +72,11 @@ const config = {
   // Facebook Reels Configuration
   reels: {
     // จำนวนเวลารอระหว่างการโพสต์แต่ละเพจ (วินาที)
-    delayBetweenPosts: 5,
+    delayBetweenPosts: 1, // ลดลงเพื่อความเร็ว
     // จำนวนครั้งที่จะลองใหม่หากโพสต์ไม่สำเร็จ
-    maxRetries: 3,
+    maxRetries: 2, // ลดลงเพื่อความเร็ว
     // เวลารอก่อนลองใหม่ (วินาที)
-    retryDelay: 10,
+    retryDelay: 5, // ลดลงเพื่อความเร็ว
   }
 };
 
@@ -57,8 +84,8 @@ const config = {
 const validateConfig = () => {
   const required = [
     'telegram.botToken',
-    'facebook.appId',
-    'facebook.appSecret'
+    'facebook.appId'
+    // ลบ 'facebook.appSecret' ออกเพราะไม่จำเป็น
   ];
   
   for (const key of required) {
@@ -66,6 +93,11 @@ const validateConfig = () => {
     if (!value) {
       throw new Error(`Missing required configuration: ${key}`);
     }
+  }
+  
+  // แจ้งเตือนถ้าไม่มี APP_SECRET
+  if (!config.facebook.appSecret) {
+    console.warn('⚠️  FACEBOOK_APP_SECRET ไม่ได้ตั้งค่า - จะใช้แค่ Page Access Token');
   }
   
   if (config.facebook.pages.length === 0) {

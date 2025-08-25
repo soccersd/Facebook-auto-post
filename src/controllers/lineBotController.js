@@ -19,6 +19,14 @@ class TelegramBotController {
     this.videoProcessor = new VideoProcessor();
     this.facebookReelsService = new FacebookReelsService();
     
+    // เก็บสถานะการรอ description
+    this.pendingVideos = new Map(); // videoFileId -> { videoPath, userId, chatId, timestamp }
+    
+    // ทำความสะอาด pending videos ทุก 5 นาที
+    setInterval(() => {
+      this.cleanupPendingVideos();
+    }, 5 * 60 * 1000);
+    
     // Store the instance
     TelegramBotController.instance = this;
     
@@ -40,14 +48,22 @@ class TelegramBotController {
       // Clear webhook ก่อนเริ่ม polling
       await this.clearWebhook();
       
-      // สร้าง Telegram Bot client
+      // สร้าง Telegram Bot client ด้วยการตั้งค่า polling ที่ปรับปรุงแล้ว
       this.bot = new TelegramBot(config.telegram.botToken, { 
         polling: {
-          interval: 1000,
+          interval: 2000,        // เพิ่มจาก 1000ms เป็น 2000ms เพื่อลดความถี่ polling
           autoStart: true,
           params: {
-            timeout: 10
+            timeout: 20,         // เพิ่มจาก 10s เป็น 20s เพื่อใข้เวลาการรอ response นานขึ้น
+            limit: 100,         // จำกัดจำนวน messages ต่อ request
+            allowed_updates: ['message', 'callback_query'] // จำกัดประเภท updates ที่จะรับ
           }
+        },
+        // เพิ่มการตั้งค่า request timeout
+        request: {
+          timeout: 30000,      // 30 วินาทีสำหรับ HTTP request timeout
+          agent: false,        // ใช้ global agent
+          forever: true        // เปิดใช้ keep-alive connections
         }
       });
       
@@ -89,7 +105,7 @@ class TelegramBotController {
       logger.error('Telegram Bot error:', error);
     });
 
-    // Handle polling errors แบบ graceful
+    // Handle polling errors แบบ graceful พร้อมจัดการ ETIMEDOUT และ network errors
     this.bot.on('polling_error', (error) => {
       if (error.code === 'ETELEGRAM' && error.response?.statusCode === 409) {
         logger.warn('Telegram Bot conflict detected - another instance might be running');
@@ -97,8 +113,24 @@ class TelegramBotController {
         setTimeout(() => {
           this.restartPolling();
         }, 5000);
+      } else if (error.code === 'EFATAL' || error.message?.includes('ETIMEDOUT') || error.message?.includes('read ETIMEDOUT')) {
+        logger.warn('Telegram API timeout detected (ETIMEDOUT) - network connection issue');
+        logger.info('Attempting to restart polling in 10 seconds...');
+        setTimeout(() => {
+          this.restartPolling();
+        }, 10000);
+      } else if (error.code === 'ECONNRESET' || error.code === 'ECONNREFUSED') {
+        logger.warn('Network connection error detected - will retry connection');
+        logger.info('Attempting to restart polling in 15 seconds...');
+        setTimeout(() => {
+          this.restartPolling();
+        }, 15000);
       } else {
-        logger.error('Telegram Bot polling error:', error);
+        logger.error('Telegram Bot polling error (unknown):', error);
+        logger.info('Attempting to restart polling in 30 seconds...');
+        setTimeout(() => {
+          this.restartPolling();
+        }, 30000);
       }
     });
 
@@ -149,7 +181,7 @@ class TelegramBotController {
 
     try {
       // ส่งข้อความแจ้งว่าได้รับวิดีโอแล้ว
-      await this.sendMessage(chatId, '📹 ได้รับวิดีโอของคุณแล้ว! กำลังประมวลผลและเตรียมโพสต์ไปยัง Facebook Reels (โพสต์แค่หนึ่งคลิปต่อหนึ่งเพจ) กรุณารอสักครู่นะครับ...');
+      await this.sendMessage(chatId, '📹 ได้รับวิดีโอของคุณแล้ว! กำลังดาวน์โหลด...');
 
       // ดาวน์โหลดวิดีโอจาก Telegram
       logger.info('Starting video download from Telegram:', { videoFileId, userId });
@@ -163,17 +195,19 @@ class TelegramBotController {
       
       logger.info('Video processed for Reels:', { processedVideoPath });
 
-      // ส่งไปยังคิวสำหรับโพสต์ Facebook Reels
-      await this.facebookReelsService.queueReelsPosting({
+      // เก็บข้อมูลวิดีโอไว้เพื่อรอ description
+      this.pendingVideos.set(videoFileId, {
         videoPath: processedVideoPath,
-        originalMessageId: videoFileId,
         userId: userId,
         chatId: chatId,
-        timestamp: new Date()
+        timestamp: new Date(),
+        originalMessageId: videoFileId
       });
 
-      // ส่งข้อความแจ้งว่าเริ่มโพสต์แล้ว
-      await this.sendMessage(chatId, '✅ เริ่มโพสต์วิดีโอไปยัง Facebook Reels แล้ว! ระบบจะโพสต์แค่หนึ่งคลิปต่อหนึ่งเพจ คุณจะได้รับการแจ้งเตือนเมื่อโพสต์เสร็จสิ้น');
+      // ถาม description จากผู้ใช้
+      await this.sendMessage(chatId, 
+        '✨ กรุณาใส่คำอธิบาย (description) สำหรับคลิปนี้\n\n📝 ส่งข้อความมาในข้อความถัดไป หรือ\n🚀 พิมพ์ "skip" เพื่อข้ามการใส่คำอธิบาย'
+      );
 
     } catch (error) {
       logger.error('Error processing video message:', error);
@@ -186,11 +220,57 @@ class TelegramBotController {
   async handleTextMessage(msg) {
     const chatId = msg.chat.id;
     const text = msg.text.toLowerCase();
+    const userId = msg.from.id;
+
+    // ตรวจสอบว่ามีวิดีโอที่รอ description อยู่หรือไม่
+    if (this.pendingVideos.size > 0) {
+      // หาวิดีโอที่ตรงกับ userId นี้
+      let pendingVideo = null;
+      let videoFileId = null;
+      
+      for (const [fileId, videoData] of this.pendingVideos.entries()) {
+        if (videoData.userId === userId && videoData.chatId === chatId) {
+          pendingVideo = videoData;
+          videoFileId = fileId;
+          break;
+        }
+      }
+      
+      if (pendingVideo) {
+        let description = msg.text;
+        
+        // ถ้าผู้ใช้พิมพ์ "skip" ให้ใช้ description เริ่มต้น
+        if (text === 'skip') {
+          description = 'คลิปใหม่มาแล้วครับ';
+          await this.sendMessage(chatId, 'ข้ามการใส่คำอธิบาย จะใช้คำอธิบายเริ่มต้น');
+        } else {
+          await this.sendMessage(chatId, `✨ ได้รับคำอธิบายแล้ว: "${description}"`);
+        }
+        
+        // ลบออกจากคิว
+        this.pendingVideos.delete(videoFileId);
+        
+        // เริ่มโพสต์วิดีโอพร้อม description
+        await this.sendMessage(chatId, '🚀 เริ่มโพสต์วิดีโอไปยัง Facebook Reels กรุณารอสักครู่นะครับ...');
+        
+        // ส่งไปยังคิวสำหรับโพสต์ Facebook Reels
+        await this.facebookReelsService.queueReelsPosting({
+          videoPath: pendingVideo.videoPath,
+          originalMessageId: pendingVideo.originalMessageId,
+          userId: pendingVideo.userId,
+          chatId: pendingVideo.chatId,
+          timestamp: pendingVideo.timestamp,
+          description: description // เพิ่ม description
+        });
+        
+        return; // ออกจากฟังก์ชัน
+      }
+    }
 
     // คำสั่งต่างๆ
     if (text === '/help' || text === 'help' || text === 'ช่วยเหลือ') {
       return await this.sendMessage(chatId, 
-        `🤖 Telegram Bot สำหรับโพสต์ Facebook Reels\n\n📹 วิธีใช้งาน:\n1. ส่งไฟล์วิดีโอมาที่นี่\n2. ระบบจะประมวลผลและโพสต์ไปยัง Facebook Reels แค่หนึ่งคลิปต่อหนึ่งเพจ\n3. คุณจะได้รับการแจ้งเตือนเมื่อโพสต์เสร็จสิ้น\n\n💫 คำสั่ง:\n- "/help" หรือ "ช่วยเหลือ" - แสดงวิธีใช้งาน\n- "/status" หรือ "สถานะ" - ตรวจสอบสถานะระบบ`
+        `🤖 Telegram Bot สำหรับโพสต์ Facebook Reels\n\n📹 วิธีใช้งาน:\n1. ส่งไฟล์วิดีโอมาที่นี่\n2. บอทจะถามคำอธิบาย\n3. ใส่คำอธิบายที่ต้องการ หรือ พิมพ์ "skip"\n4. บอทจะโพสต์ไปยัง Facebook Page อัตโนมัติ\n\n💫 คำสั่ง:\n- "/help" หรือ "ช่วยเหลือ" - แสดงวิธีใช้งาน\n- "/status" หรือ "สถานะ" - ตรวจสอบสถานะระบบ`
       );
     }
 
@@ -201,13 +281,13 @@ class TelegramBotController {
 
     if (text === '/start') {
       return await this.sendMessage(chatId, 
-        `🎉 ยินดีต้อนรับสู่ Telegram Bot สำหรับโพสต์ Facebook Reels!\n\n📹 ส่งวิดีโอมาที่นี่ แล้วผมจะโพสต์ไปยัง Facebook Reels (แค่หนึ่งคลิปต่อหนึ่งเพจ) ให้คุณอัตโนมัติ\n\n💬 พิมพ์ "/help" เพื่อดูวิธีใช้งานครับ`
+        `🎉 ยินดีต้อนรับสู่ Telegram Bot สำหรับโพสต์ Facebook Reels!\n\n📹 ส่งวิดีโอมาที่นี่ แล้วผมจะโพสต์ไปยัง Facebook Reels ให้คุณอัตโนมัติ\n\n💬 พิมพ์ "/help" เพื่อดูวิธีใช้งานครับ`
       );
     }
 
     // ข้อความเริ่มต้น
     return await this.sendMessage(chatId, 
-      `🤖 สวัสดีครับ! ผมเป็น Bot สำหรับโพสต์วิดีโอไปยัง Facebook Reels อัตโนมัติ\n\n📹 กรุณาส่งไฟล์วิดีโอมาที่นี่ แล้วผมจะโพสต์ไปยัง Facebook Reels (แค่หนึ่งคลิปต่อหนึ่งเพจ) ให้คุณเลย!\n\n💬 พิมพ์ "/help" หากต้องการดูวิธีใช้งาน`
+      `🤖 สวัสดีครับ! ผมเป็น Bot สำหรับโพสต์วิดีโอไปยัง Facebook Reels อัตโนมัติ\n\n📹 กรุณาส่งไฟล์วิดีโอมาที่นี่ แล้วผมจะโพสต์ไปยัง Facebook Page ให้คุณเลย!\n\n💬 พิมพ์ "/help" หากต้องการดูวิธีใช้งาน`
     );
   }
 
@@ -240,14 +320,15 @@ class TelegramBotController {
         expectedSize: fileInfo.file_size
       });
       
-      // ขั้นตอนที่ 4: ดาวน์โหลดด้วย axios stream (ตามคำแนะนำ)
+      // ขั้นตอนที่ 4: ดาวน์โหลดด้วย axios stream (ปรับปรุงความเร็ว)
       const response = await axios({
         method: 'GET',
         url: fileUrl,
         responseType: 'stream',
-        timeout: 5 * 60 * 1000, // 5 นาที timeout
+        timeout: 3 * 60 * 1000, // ลดเหลือ 3 นาที timeout
         maxContentLength: Infinity,
-        maxBodyLength: Infinity
+        maxBodyLength: Infinity,
+        maxRedirects: 5
       });
       
       const writeStream = fs.createWriteStream(localFilePath);
@@ -326,13 +407,33 @@ class TelegramBotController {
   // ดึงสถานะระบบ
   async getSystemStatus() {
     try {
-      const enabledPagesCount = this.facebookReelsService.getEnabledPagesCount();
+      const enabledPagesCount = await this.facebookReelsService.getEnabledPagesCount();
       const queueStatus = await this.facebookReelsService.getQueueStatus();
       
       return `📊 สถานะระบบ:\n\n🔸 Facebook Pages: ${enabledPagesCount} เพจ (ที่มีข้อมูลจริง)\n🔸 งานในคิว: ${queueStatus.waiting} รายการ\n🔸 กำลังประมวลผล: ${queueStatus.active} รายการ\n🔸 เสร็จสิ้นแล้ว: ${queueStatus.completed} รายการ\n🔸 ล้มเหลว: ${queueStatus.failed} รายการ\n\n✅ ระบบพร้อมใช้งาน`;
     } catch (error) {
       logger.error('Error getting system status:', error);
       return '❌ ไม่สามารถดึงสถานะระบบได้ในขณะนี้';
+    }
+  }
+
+  // ทำความสะอาด pending videos ที่เก่าเกินไป
+  cleanupPendingVideos() {
+    const now = new Date();
+    const maxAge = 10 * 60 * 1000; // 10 นาที
+    
+    for (const [fileId, videoData] of this.pendingVideos.entries()) {
+      if (now - videoData.timestamp > maxAge) {
+        logger.info('Cleaning up expired pending video:', { fileId, userId: videoData.userId });
+        this.pendingVideos.delete(fileId);
+        
+        // ลบไฟล์วิดีโอที่ไม่ได้โพสต์
+        try {
+          fs.remove(videoData.videoPath).catch(() => {});
+        } catch (error) {
+          logger.warn('Failed to cleanup pending video file:', error.message);
+        }
+      }
     }
   }
 

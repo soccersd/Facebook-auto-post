@@ -1,179 +1,156 @@
-// Facebook Pages Management
-// This file use Manage all Facebook Pages 
+// Facebook Pages Management - Fully Automated
+// This file automatically manages all Facebook Pages from environment variables
+// 
+// วิธีการตั้งค่า:
+// 1. เพิ่ม Page Access Token ใน .env file เท่านั้น:
+//    FACEBOOK_PAGE_TOKEN_1=YOUR_PAGE_ACCESS_TOKEN
+//    FACEBOOK_PAGE_TOKEN_2=YOUR_PAGE_ACCESS_TOKEN
+// 2. ระบบจะดึง Page ID และ Page Name อัตโนมัติจาก Facebook API
+//
+// ข้อดี:
+// - ไม่ต้องกรอกข้อมูลใน code เลย - ทุกอย่างอัตโนมัติ
+// - ดึง Page ID และ Page Name จาก Facebook API โดยตรง
+// - จัดการ Token ที่เดียวใน .env 
+// - ปลอดภัยและง่ายต่อการจัดการ
+
+const axios = require('axios');
 
 class FacebookPagesManager {
   constructor() {
-    // รายการเพจ Facebook ทั้งหมด - สามารถเพิ่มเพจใหม่ได้ที่นี่
-    this.pages = [
-      // ข้อมูลจริงจาก Facebook API Response
-      {
-        id: 1,
-        pageId: '699047869968552',
-        accessToken: 'EAA7nrgmFk08BPVMXRAn25fMQ6kly9pn8GrfnYJtZAQiSHAuyxwAL4kxIH2DdHZBdokMO9WngongJu7rYOCmOw4ZCcdz2AgFdTjpm8DZCdZBqF55nu26cFTNeJ8V8alcyRNVMTFjxEIb2nPh8SCRhWhREZAZASBSITwOVSZC2E9Q2WBy6KHNXVVB8cFJSCWrnAk2JtIRAjZAUFYW5t9sfzefLU2P5qCZCaj2h8UXhcZBZC0xEWrXNivce44e0JqoZD',
-        name: 'Botshottest',
-        enabled: true
-      },
-      {
-        id: 2,
-        pageId: 'YOUR_PAGE_ID_2',
-        accessToken: 'YOUR_PAGE_ACCESS_TOKEN_2',
-        name: 'Page 2',
-        enabled: true
-      },
-      {
-        id: 3,
-        pageId: 'YOUR_PAGE_ID_3',
-        accessToken: 'YOUR_PAGE_ACCESS_TOKEN_3',
-        name: 'Page 3',
-        enabled: true
-      },
-      {
-        id: 4,
-        pageId: 'YOUR_PAGE_ID_4',
-        accessToken: 'YOUR_PAGE_ACCESS_TOKEN_4',
-        name: 'Page 4',
-        enabled: true
-      },
-      {
-        id: 5,
-        pageId: 'YOUR_PAGE_ID_5',
-        accessToken: 'YOUR_PAGE_ACCESS_TOKEN_5',
-        name: 'Page 5',
-        enabled: true
-      },
-      {
-        id: 6,
-        pageId: 'YOUR_PAGE_ID_6',
-        accessToken: 'YOUR_PAGE_ACCESS_TOKEN_6',
-        name: 'Page 6',
-        enabled: true
-      },
-      {
-        id: 7,
-        pageId: 'YOUR_PAGE_ID_7',
-        accessToken: 'YOUR_PAGE_ACCESS_TOKEN_7',
-        name: 'Page 7',
-        enabled: true
-      },
-      {
-        id: 8,
-        pageId: 'YOUR_PAGE_ID_8',
-        accessToken: 'YOUR_PAGE_ACCESS_TOKEN_8',
-        name: 'Page 8',
-        enabled: true
-      },
-      {
-        id: 9,
-        pageId: 'YOUR_PAGE_ID_9',
-        accessToken: 'YOUR_PAGE_ACCESS_TOKEN_9',
-        name: 'Page 9',
-        enabled: true
-      },
-      {
-        id: 10,
-        pageId: 'YOUR_PAGE_ID_10',
-        accessToken: 'YOUR_PAGE_ACCESS_TOKEN_10',
-        name: 'Page 10',
-        enabled: true
-      },
-      {
-        id: 11,
-        pageId: 'YOUR_PAGE_ID_11',
-        accessToken: 'YOUR_PAGE_ACCESS_TOKEN_11',
-        name: 'Page 11',
-        enabled: true
-      },
-      {
-        id: 12,
-        pageId: 'YOUR_PAGE_ID_12',
-        accessToken: 'YOUR_PAGE_ACCESS_TOKEN_12',
-        name: 'Page 12',
-        enabled: true
-      },
-      {
-        id: 13,
-        pageId: 'YOUR_PAGE_ID_13',
-        accessToken: 'YOUR_PAGE_ACCESS_TOKEN_13',
-        name: 'Page 13',
-        enabled: true
-      },
-      {
-        id: 14,
-        pageId: 'YOUR_PAGE_ID_14',
-        accessToken: 'YOUR_PAGE_ACCESS_TOKEN_14',
-        name: 'Page 14',
-        enabled: true
-      },
-      {
-        id: 15,
-        pageId: 'YOUR_PAGE_ID_15',
-        accessToken: 'YOUR_PAGE_ACCESS_TOKEN_15',
-        name: 'Page 15',
-        enabled: true
-      },
-      {
-        id: 16,
-        pageId: 'YOUR_PAGE_ID_16',
-        accessToken: 'YOUR_PAGE_ACCESS_TOKEN_16',
-        name: 'Page 16',
-        enabled: true
-      },
-      {
-        id: 17,
-        pageId: 'YOUR_PAGE_ID_17',
-        accessToken: 'YOUR_PAGE_ACCESS_TOKEN_17',
-        name: 'Page 17',
-        enabled: true
-      },
-      {
-        id: 18,
-        pageId: 'YOUR_PAGE_ID_18',
-        accessToken: 'YOUR_PAGE_ACCESS_TOKEN_18',
-        name: 'Page 18',
-        enabled: true
-      },
-      {
-        id: 19,
-        pageId: 'YOUR_PAGE_ID_19',
-        accessToken: 'YOUR_PAGE_ACCESS_TOKEN_19',
-        name: 'Page 19',
-        enabled: true
-      },
-      {
-        id: 20,
-        pageId: 'YOUR_PAGE_ID_20',
-        accessToken: 'YOUR_PAGE_ACCESS_TOKEN_20',
-        name: 'Page 20',
-        enabled: true
+    // สร้าง pages array โดยอัตโนมัติจาก environment variables
+    this.pages = [];
+    this.initialized = false;
+  }
+
+  // Initialize pages asynchronously
+  async initialize() {
+    if (this.initialized) return;
+    this.pages = await this.generatePagesFromEnv();
+    this.initialized = true;
+  }
+
+  // สร้าง pages array จาก environment variables และดึงข้อมูลจาก Facebook API
+  async generatePagesFromEnv() {
+    const pages = [];
+    let pageIndex = 1;
+    
+    console.log('🔄 Auto-generating Facebook pages from environment variables...');
+    
+    // วนลูปหา FACEBOOK_PAGE_TOKEN_X ใน environment variables
+    while (true) {
+      const pageToken = process.env[`FACEBOOK_PAGE_TOKEN_${pageIndex}`];
+      
+      // ถ้าไม่มี token แล้ว ให้หยุด
+      if (!pageToken) {
+        break;
       }
-      // สามารถเพิ่มเพจใหม่ได้ที่นี่ในอนาคต
-    ];
+      
+      console.log(`📡 Fetching page info for token ${pageIndex}...`);
+      
+      try {
+        // ดึงข้อมูล Page จาก Facebook API อัตโนมัติ
+        const pageInfo = await this.fetchPageInfoFromFacebook(pageToken);
+        
+        // สร้าง page object ด้วยข้อมูลจริงจาก Facebook
+        const page = {
+          id: pageIndex,
+          pageId: pageInfo.id,
+          accessToken: pageToken,
+          appId: process.env[`FACEBOOK_APP_ID_${pageIndex}`] || `app${pageIndex}`,
+          name: pageInfo.name,
+          category: pageInfo.category || 'Unknown',
+          enabled: true,
+          // เพิ่มข้อมูลเสริมจาก Facebook API
+          followers: pageInfo.followers_count || 0,
+          verification: pageInfo.verification_status || 'not_verified',
+          fetchedAt: new Date().toISOString()
+        };
+        
+        pages.push(page);
+        console.log(`✅ Page ${pageIndex}: ${pageInfo.name} (ID: ${pageInfo.id})`);
+        
+      } catch (error) {
+        console.error(`❌ Failed to fetch page info for token ${pageIndex}:`, error.message);
+        
+        // สร้าง fallback page object
+        const fallbackPage = {
+          id: pageIndex,
+          pageId: process.env[`FACEBOOK_PAGE_ID_${pageIndex}`] || `UNKNOWN_PAGE_${pageIndex}`,
+          accessToken: pageToken,
+          appId: process.env[`FACEBOOK_APP_ID_${pageIndex}`] || `app${pageIndex}`,
+          name: process.env[`FACEBOOK_PAGE_NAME_${pageIndex}`] || `Page ${pageIndex} (API Error)`,
+          enabled: false, // ปิดใช้งานถ้าดึงข้อมูลไม่ได้
+          error: error.message,
+          fetchedAt: new Date().toISOString()
+        };
+        
+        pages.push(fallbackPage);
+      }
+      
+      pageIndex++;
+      
+      // เพิ่ม delay เล็กน้อยเพื่อป้องกัน rate limiting
+      if (pageIndex > 1) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+    
+    const enabledCount = pages.filter(p => p.enabled).length;
+    console.log(`📄 Auto-generated ${pages.length} page(s), ${enabledCount} enabled`);
+    return pages;
+  }
+
+  // ดึงข้อมูล Page จาก Facebook Graph API
+  async fetchPageInfoFromFacebook(pageToken) {
+    try {
+      const response = await axios.get('https://graph.facebook.com/v18.0/me', {
+        params: {
+          access_token: pageToken,
+          fields: 'id,name,category,followers_count,verification_status'
+        },
+        timeout: 10000 // 10 seconds timeout
+      });
+      
+      return response.data;
+    } catch (error) {
+      if (error.response) {
+        throw new Error(`Facebook API Error: ${error.response.status} - ${error.response.data?.error?.message || 'Unknown error'}`);
+      } else if (error.request) {
+        throw new Error('Facebook API Request Failed: No response received');
+      } else {
+        throw new Error(`Request Setup Error: ${error.message}`);
+      }
+    }
   }
 
   // ดึงข้อมูลเพจทั้งหมดที่เปิดใช้งาน
-  getEnabledPages() {
+  async getEnabledPages() {
+    await this.initialize();
     return this.pages.filter(page => {
       // ตรวจสอบว่าเพจมีข้อมูลจริงและเปิดใช้งาน
       return page.enabled && 
              page.pageId && 
              page.accessToken && 
-             !page.pageId.startsWith('YOUR_PAGE_ID_') &&
+             !page.pageId.startsWith('UNKNOWN_PAGE_') &&
              !page.accessToken.startsWith('YOUR_PAGE_ACCESS_TOKEN_');
     });
   }
 
   // ดึงข้อมูลเพจตาม ID
-  getPageById(id) {
+  async getPageById(id) {
+    await this.initialize();
     return this.pages.find(page => page.id === id);
   }
 
   // ดึงข้อมูลเพจตาม Facebook Page ID
-  getPageByFacebookId(pageId) {
+  async getPageByFacebookId(pageId) {
+    await this.initialize();
     return this.pages.find(page => page.pageId === pageId);
   }
 
   // เพิ่มเพจใหม่
-  addPage(pageData) {
+  async addPage(pageData) {
+    await this.initialize();
     const newId = Math.max(...this.pages.map(p => p.id)) + 1;
     const newPage = {
       id: newId,
@@ -185,8 +162,9 @@ class FacebookPagesManager {
   }
 
   // เปิด/ปิดการใช้งานเพจ
-  togglePage(id, enabled) {
-    const page = this.getPageById(id);
+  async togglePage(id, enabled) {
+    await this.initialize();
+    const page = await this.getPageById(id);
     if (page) {
       page.enabled = enabled;
       return true;
@@ -195,8 +173,9 @@ class FacebookPagesManager {
   }
 
   // อัพเดตข้อมูลเพจ
-  updatePage(id, updates) {
-    const page = this.getPageById(id);
+  async updatePage(id, updates) {
+    await this.initialize();
+    const page = await this.getPageById(id);
     if (page) {
       Object.assign(page, updates);
       return page;
@@ -205,7 +184,8 @@ class FacebookPagesManager {
   }
 
   // ลบเพจ
-  removePage(id) {
+  async removePage(id) {
+    await this.initialize();
     const index = this.pages.findIndex(page => page.id === id);
     if (index !== -1) {
       return this.pages.splice(index, 1)[0];
@@ -214,22 +194,61 @@ class FacebookPagesManager {
   }
 
   // ดึงจำนวนเพจทั้งหมด
-  getTotalPages() {
+  async getTotalPages() {
+    await this.initialize();
     return this.pages.length;
   }
 
   // ดึงจำนวนเพจที่เปิดใช้งาน
-  getEnabledPagesCount() {
-    return this.getEnabledPages().length;
+  async getEnabledPagesCount() {
+    const enabledPages = await this.getEnabledPages();
+    return enabledPages.length;
+  }
+
+  // ดึงเพจตาม Facebook App ID
+  async getPagesByAppId(appId) {
+    const enabledPages = await this.getEnabledPages();
+    return enabledPages.filter(page => page.appId === appId);
+  }
+
+  // ดึงรายการ Facebook App IDs ทั้งหมดที่ใช้งานอยู่
+  async getUsedAppIds() {
+    const enabledPages = await this.getEnabledPages();
+    const appIds = enabledPages.map(page => page.appId).filter(Boolean);
+    return [...new Set(appIds)]; // ลบค่าซ้ำ
+  }
+
+  // ดึงสถิติการใช้งาน Facebook Apps
+  async getAppUsageStats() {
+    const appIds = await this.getUsedAppIds();
+    const stats = {};
+    
+    for (const appId of appIds) {
+      const pages = await this.getPagesByAppId(appId);
+      stats[appId] = {
+        totalPages: pages.length,
+        pageNames: pages.map(page => page.name),
+        pageDetails: pages.map(page => ({
+          id: page.pageId,
+          name: page.name,
+          followers: page.followers || 0,
+          verification: page.verification || 'not_verified'
+        }))
+      };
+    }
+    
+    return stats;
   }
 
   // ตรวจสอบความถูกต้องของข้อมูลเพจ
-  validatePagesConfiguration() {
+  async validatePagesConfiguration() {
+    await this.initialize();
     const errors = [];
-    const enabledPages = this.getEnabledPages();
+    const warnings = [];
+    const enabledPages = await this.getEnabledPages();
     
     enabledPages.forEach((page, index) => {
-      if (!page.pageId || page.pageId.startsWith('YOUR_PAGE_ID_')) {
+      if (!page.pageId || page.pageId.startsWith('UNKNOWN_PAGE_')) {
         errors.push(`Page ${index + 1}: Missing or invalid Facebook Page ID`);
       }
       
@@ -237,15 +256,79 @@ class FacebookPagesManager {
         errors.push(`Page ${index + 1}: Missing or invalid Page Access Token`);
       }
       
-      if (!page.name) {
-        errors.push(`Page ${index + 1}: Missing page name`);
+      if (!page.name || page.name.includes('API Error')) {
+        errors.push(`Page ${index + 1}: Missing page name or API fetch failed`);
+      }
+      
+      // Additional validations for auto-fetched data
+      if (page.error) {
+        warnings.push(`Page ${index + 1}: ${page.error}`);
+      }
+      
+      if (page.verification === 'not_verified') {
+        warnings.push(`Page ${index + 1}: Page is not verified on Facebook`);
       }
     });
+    
+    const disabledPages = this.pages.filter(page => !page.enabled);
     
     return {
       isValid: errors.length === 0,
       errors,
-      enabledPagesCount: enabledPages.length
+      warnings,
+      enabledPagesCount: enabledPages.length,
+      disabledPagesCount: disabledPages.length,
+      totalPagesCount: this.pages.length,
+      lastFetched: new Date().toISOString()
+    };
+  }
+
+  // ฟังก์ชันสำหรับ refresh ข้อมูลเพจ
+  async refreshPageData() {
+    console.log('🔄 Refreshing Facebook page data...');
+    this.pages = [];
+    this.initialized = false;
+    await this.initialize();
+    console.log('✅ Page data refreshed successfully');
+    return this.pages;
+  }
+
+  // แสดงรายงานเพจทั้งหมด
+  async generateReport() {
+    await this.initialize();
+    const stats = await this.getAppUsageStats();
+    const validation = await this.validatePagesConfiguration();
+    
+    console.log('\n=== Facebook Pages Auto-Configuration Report ===');
+    console.log(`📊 Total Pages: ${validation.totalPagesCount}`);
+    console.log(`✅ Enabled Pages: ${validation.enabledPagesCount}`);
+    console.log(`❌ Disabled Pages: ${validation.disabledPagesCount}`);
+    
+    if (validation.errors.length > 0) {
+      console.log('\n❌ Errors:');
+      validation.errors.forEach(error => console.log(`   ${error}`));
+    }
+    
+    if (validation.warnings.length > 0) {
+      console.log('\n⚠️  Warnings:');
+      validation.warnings.forEach(warning => console.log(`   ${warning}`));
+    }
+    
+    console.log('\n📱 Apps Usage:');
+    Object.entries(stats).forEach(([appId, stat]) => {
+      console.log(`   ${appId}: ${stat.totalPages} page(s)`);
+      stat.pageDetails.forEach(page => {
+        console.log(`     📄 ${page.name} (${page.id}) - ${page.followers} followers`);
+      });
+    });
+    
+    console.log(`\n🕒 Last Updated: ${validation.lastFetched}`);
+    console.log('================================================\n');
+    
+    return {
+      stats,
+      validation,
+      pages: this.pages
     };
   }
 }
