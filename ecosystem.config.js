@@ -9,11 +9,11 @@ module.exports = {
       max_memory_restart: '500M',
       env: {
         NODE_ENV: 'production',
-        PORT: 3000,
+        PORT: 3001, // VPS production ใช้ 3001
       },
       env_development: {
         NODE_ENV: 'development',
-        PORT: 3000,
+        PORT: 3000, // Local development ใช้ 3000
       },
       error_file: './logs/err.log',
       out_file: './logs/out.log',
@@ -57,7 +57,7 @@ module.exports = {
       // Custom environment for production
       env_production: {
         NODE_ENV: 'production',
-        PORT: 3000,
+        PORT: 3001,
         LOG_LEVEL: 'info',
         // Performance optimizations
         UV_THREADPOOL_SIZE: 4,

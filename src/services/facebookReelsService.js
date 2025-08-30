@@ -869,7 +869,8 @@ class FacebookReelsService {
       const pages = await this.pagesManager.getEnabledPages();
       const results = [];
 
-      for (const page of pages.slice(0, 3)) { // ทดสอบเพื่อ 3 เพจแรก
+      // ตรวจสอบทุกเพจที่เปิดใช้งาน แทนที่จะจำกัดแค่ 3 เพจแรก
+      for (const page of pages) {
         try {
           const response = await axios.get(
             `${this.baseURL}/${page.pageId}?fields=id,name&access_token=${page.accessToken}`
@@ -888,6 +889,11 @@ class FacebookReelsService {
             status: 'error',
             error: error.response?.data?.error?.message || error.message
           });
+        }
+        
+        // เพิ่ม delay เล็กน้อยเพื่อป้องกัน rate limiting เมื่อตรวจสอบหลายเพจ
+        if (pages.length > 3) {
+          await new Promise(resolve => setTimeout(resolve, 100));
         }
       }
 

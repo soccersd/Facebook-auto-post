@@ -86,8 +86,8 @@ else
 fi
 
 print_header "ขั้นตอนที่ 7: ตั้งค่า Firewall"
-print_status "เปิด port 3000 สำหรับแอปพลิเคชัน..."
-sudo ufw allow 3000
+print_status "เปิด port 3001 สำหรับแอปพลิเคชัน..."
+sudo ufw allow 3001
 sudo ufw allow ssh
 sudo ufw --force enable
 

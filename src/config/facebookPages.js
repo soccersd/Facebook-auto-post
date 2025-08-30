@@ -183,7 +183,7 @@ class FacebookPagesManager {
     return null;
   }
 
-  // ลบเพจ
+  // Delete pages
   async removePage(id) {
     await this.initialize();
     const index = this.pages.findIndex(page => page.id === id);

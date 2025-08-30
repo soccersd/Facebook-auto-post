@@ -104,19 +104,21 @@ echo "   pm2 restart telegram-facebook-bot - รีสตาร์ท"
 echo "   pm2 monit                     - monitoring"
 echo ""
 echo "🔗 API Endpoints:"
-echo "   http://localhost:3000/health     - Health check"
-echo "   http://localhost:3000/api/status - System status"
+echo "   http://localhost:3001/health     - Health check"
+echo "   http://localhost:3001/api/status - System status"
+echo "   http://localhost:3001/api/facebook/pages - Facebook pages status"
 echo ""
 echo "📝 Next Steps:"
-echo "   1. แก้ไขไฟล์ .env ใส่ TELEGRAM_BOT_TOKEN"
-echo "   2. แก้ไขไฟล์ src/config/facebookPages.js"
-echo "   3. ทดสอบ Bot ใน Telegram"
+echo "   1. แก้ไขไฟล์ .env ใส่ TELEGRAM_BOT_TOKEN และ Facebook tokens"
+echo "   2. ตรวจสอบว่า Facebook pages auto-generation ทำงาน: pm2 logs telegram-facebook-bot --lines 20"
+echo "   3. ทดสอบ Bot ใน Telegram ส่งวิดีโอ"
+echo "   4. ตรวจสอบการโพสต์ Facebook: curl http://localhost:3001/api/facebook/pages"
 echo ""
 
 # ตรวจสอบว่าแอปพลิเคชันทำงานหรือไม่
 sleep 3
-if curl -s http://localhost:3000/health > /dev/null; then
-    print_status "✅ แอปพลิเคชันทำงานปกติที่ port 3000"
+if curl -s http://localhost:3001/health > /dev/null; then
+    print_status "✅ แอปพลิเคชันทำงานปกติที่ port 3001"
 else
     print_warning "⚠️  แอปพลิเคชันอาจยังไม่พร้อม ให้ตรวจสอบ logs: pm2 logs telegram-facebook-bot"
 fi
