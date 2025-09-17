@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+
+# Environment variables
+.env
+.env.production
+
+# Runtime data
+*.pid
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Uploads (if you want to keep them local only)
+uploads/
+
+# IDE files
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp

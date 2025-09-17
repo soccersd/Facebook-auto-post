@@ -1,0 +1,11 @@
+# Enable legacy peer deps for compatibility
+legacy-peer-deps=true
+
+# Audit level
+audit-level=moderate
+
+# Progress bar
+progress=true
+
+# Fund messages
+fund=false
