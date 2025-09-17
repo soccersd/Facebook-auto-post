@@ -1,0 +1,232 @@
+Sat Aug 23 19:02:36 +07 2025: Starting Telegram Bot...
+Sat Aug 23 19:02:36 +07 2025: Bot restart requested
+Sat Aug 23 19:02:38 +07 2025: Starting new bot process...
+Sat Aug 23 19:02:38 +07 2025: Clearing Telegram webhook...
+{"ok":true,"result":true,"description":"Webhook is already deleted"}Sat Aug 23 19:02:41 +07 2025: Bot started with PID: 60927
+✅ Loaded 1 Facebook page(s)
+2025-08-23 19:02:42 [[32minfo[39m]: Configuration validated successfully {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:02:42 [[32minfo[39m]: 🚀 Telegram Bot Facebook Reels Poster started successfully! {
+  "service": "linebot-facebook-reels",
+  "port": "3001",
+  "environment": "development",
+  "nodeVersion": "v24.6.0"
+}
+2025-08-23 19:02:42 [[32minfo[39m]: 📋 Available endpoints: {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:02:42 [[32minfo[39m]:   POST /webhook/telegram - Telegram Bot webhook (if using webhook mode) {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:02:42 [[32minfo[39m]:   GET  /health - Health check {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:02:42 [[32minfo[39m]:   GET  /api/status - System status {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:02:42 [[32minfo[39m]:   GET  /api/facebook/pages - Facebook pages status {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:02:42 [[32minfo[39m]: 🔧 Next steps: {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:02:42 [[32minfo[39m]:   1. Bot is running in polling mode - no webhook URL needed {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:02:42 [[32minfo[39m]:   2. Add your Telegram Bot to chat and start sending videos {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:02:42 [[32minfo[39m]:   3. Add your Facebook Page access tokens in src/config/facebookPages.js {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:02:42 [[32minfo[39m]:   4. Create .env file based on .env.example {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:02:43 [[32minfo[39m]: Webhook cleared successfully {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:02:43 [[32minfo[39m]: Telegram Bot handlers setup completed {
+  "service": "linebot-facebook-reels"
+}
+Sat Aug 23 19:04:11 +07 2025: Starting Telegram Bot...
+Sat Aug 23 19:04:11 +07 2025: Bot restart requested
+Sat Aug 23 19:04:13 +07 2025: Starting new bot process...
+Sat Aug 23 19:04:13 +07 2025: Clearing Telegram webhook...
+{"ok":true,"result":true,"description":"Webhook is already deleted"}Sat Aug 23 19:04:16 +07 2025: Bot started with PID: 61669
+✅ Loaded 1 Facebook page(s)
+2025-08-23 19:04:17 [[32minfo[39m]: Configuration validated successfully {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:04:17 [[32minfo[39m]: 🚀 Telegram Bot Facebook Reels Poster started successfully! {
+  "service": "linebot-facebook-reels",
+  "port": "3001",
+  "environment": "development",
+  "nodeVersion": "v24.6.0"
+}
+2025-08-23 19:04:17 [[32minfo[39m]: 📋 Available endpoints: {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:04:17 [[32minfo[39m]:   POST /webhook/telegram - Telegram Bot webhook (if using webhook mode) {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:04:17 [[32minfo[39m]:   GET  /health - Health check {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:04:17 [[32minfo[39m]:   GET  /api/status - System status {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:04:17 [[32minfo[39m]:   GET  /api/facebook/pages - Facebook pages status {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:04:17 [[32minfo[39m]: 🔧 Next steps: {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:04:17 [[32minfo[39m]:   1. Bot is running in polling mode - no webhook URL needed {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:04:17 [[32minfo[39m]:   2. Add your Telegram Bot to chat and start sending videos {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:04:17 [[32minfo[39m]:   3. Add your Facebook Page access tokens in src/config/facebookPages.js {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:04:17 [[32minfo[39m]:   4. Create .env file based on .env.example {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:04:18 [[32minfo[39m]: Webhook cleared successfully {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:04:18 [[32minfo[39m]: Telegram Bot handlers setup completed {
+  "service": "linebot-facebook-reels"
+}
+Sat Aug 23 19:04:34 +07 2025: Starting Telegram Bot...
+Sat Aug 23 19:05:19 +07 2025: Starting Telegram Bot...
+Sat Aug 23 19:05:55 +07 2025: Starting Telegram Bot...
+Sat Aug 23 19:05:55 +07 2025: Bot stop requested
+Sat Aug 23 19:05:55 +07 2025: Stopping existing bot process (PID: 61669)...
+2025-08-23 19:05:55 [[32minfo[39m]: Received shutdown signal, shutting down gracefully... {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:05:55 [[32minfo[39m]: HTTP server closed {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:05:56 [[32minfo[39m]: Process terminated {
+  "service": "linebot-facebook-reels"
+}
+Sat Aug 23 19:11:06 +07 2025: Starting Telegram Bot...
+Sat Aug 23 19:11:06 +07 2025: Bot restart requested
+Sat Aug 23 19:11:08 +07 2025: Starting new bot process...
+Sat Aug 23 19:11:08 +07 2025: Clearing Telegram webhook...
+{"ok":true,"result":true,"description":"Webhook is already deleted"}Sat Aug 23 19:11:10 +07 2025: Bot started with PID: 62817
+✅ Loaded 1 Facebook page(s)
+2025-08-23 19:11:12 [[32minfo[39m]: Configuration validated successfully {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:11:12 [[32minfo[39m]: 🚀 Telegram Bot Facebook Reels Poster started successfully! {
+  "service": "linebot-facebook-reels",
+  "port": "3001",
+  "environment": "development",
+  "nodeVersion": "v24.6.0"
+}
+2025-08-23 19:11:12 [[32minfo[39m]: 📋 Available endpoints: {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:11:12 [[32minfo[39m]:   POST /webhook/telegram - Telegram Bot webhook (if using webhook mode) {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:11:12 [[32minfo[39m]:   GET  /health - Health check {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:11:12 [[32minfo[39m]:   GET  /api/status - System status {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:11:12 [[32minfo[39m]:   GET  /api/facebook/pages - Facebook pages status {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:11:12 [[32minfo[39m]: 🔧 Next steps: {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:11:12 [[32minfo[39m]:   1. Bot is running in polling mode - no webhook URL needed {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:11:12 [[32minfo[39m]:   2. Add your Telegram Bot to chat and start sending videos {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:11:12 [[32minfo[39m]:   3. Add your Facebook Page access tokens in src/config/facebookPages.js {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:11:12 [[32minfo[39m]:   4. Create .env file based on .env.example {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:11:12 [[32minfo[39m]: Webhook cleared successfully {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:11:13 [[32minfo[39m]: Telegram Bot handlers setup completed {
+  "service": "linebot-facebook-reels"
+}
+Sat Aug 23 19:14:30 +07 2025: Starting Telegram Bot...
+Sat Aug 23 19:14:30 +07 2025: Bot restart requested
+Sat Aug 23 19:14:30 +07 2025: Stopping existing bot process (PID: 62817)...
+2025-08-23 19:14:31 [[32minfo[39m]: Received shutdown signal, shutting down gracefully... {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:14:31 [[32minfo[39m]: HTTP server closed {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:14:32 [[32minfo[39m]: Process terminated {
+  "service": "linebot-facebook-reels"
+}
+Sat Aug 23 19:14:36 +07 2025: Starting new bot process...
+Sat Aug 23 19:14:36 +07 2025: Clearing Telegram webhook...
+{"ok":true,"result":true,"description":"Webhook is already deleted"}Sat Aug 23 19:14:38 +07 2025: Bot started with PID: 63076
+✅ Loaded 1 Facebook page(s)
+2025-08-23 19:14:39 [[32minfo[39m]: Configuration validated successfully {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:14:40 [[32minfo[39m]: 🚀 Telegram Bot Facebook Reels Poster started successfully! {
+  "service": "linebot-facebook-reels",
+  "port": "3001",
+  "environment": "development",
+  "nodeVersion": "v24.6.0"
+}
+2025-08-23 19:14:40 [[32minfo[39m]: 📋 Available endpoints: {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:14:40 [[32minfo[39m]:   POST /webhook/telegram - Telegram Bot webhook (if using webhook mode) {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:14:40 [[32minfo[39m]:   GET  /health - Health check {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:14:40 [[32minfo[39m]:   GET  /api/status - System status {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:14:40 [[32minfo[39m]:   GET  /api/facebook/pages - Facebook pages status {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:14:40 [[32minfo[39m]: 🔧 Next steps: {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:14:40 [[32minfo[39m]:   1. Bot is running in polling mode - no webhook URL needed {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:14:40 [[32minfo[39m]:   2. Add your Telegram Bot to chat and start sending videos {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:14:40 [[32minfo[39m]:   3. Add your Facebook Page access tokens in src/config/facebookPages.js {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:14:40 [[32minfo[39m]:   4. Create .env file based on .env.example {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:14:40 [[32minfo[39m]: Webhook cleared successfully {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:14:40 [[32minfo[39m]: Telegram Bot handlers setup completed {
+  "service": "linebot-facebook-reels"
+}
+2025-08-23 19:14:40 [[32minfo[39m]: Telegram Bot initialized successfully {
+  "service": "linebot-facebook-reels"
+}
+Sat Aug 23 19:14:56 +07 2025: Starting Telegram Bot...
