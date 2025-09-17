@@ -11,12 +11,13 @@ logs/
 
 # Runtime data
 *.pid
+*.lock
 
 # OS generated files
 .DS_Store
 Thumbs.db
 
-# Uploads (if you want to keep them local only)
+# Uploads
 uploads/
 
 # IDE files
@@ -26,3 +27,9 @@ uploads/
 # Temporary files
 *.tmp
 *.temp
+
+# Large media files
+*.mp4
+*.mov
+*.avi
+*.mkv
