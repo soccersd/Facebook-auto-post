@@ -5,10 +5,6 @@ node_modules/
 logs/
 *.log
 
-# Environment variables
-.env
-.env.production
-
 # Runtime data
 *.pid
 *.lock
